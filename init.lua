@@ -155,28 +155,6 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
-  -- NOTE: Plugins can also be added by using a table,
-  -- with the first argument being the link and the following
-  -- keys can be used to configure plugin behavior/loading/etc.
-  --
-  -- Use `opts = {}` to automatically pass options to a plugin's `setup()` function, forcing the plugin to be loaded.
-  --
-
-  -- Alternatively, use `config = function() ... end` for full control over the configuration.
-  -- If you prefer to call `setup` explicitly, use:
-  --    {
-  --        'lewis6991/gitsigns.nvim',
-  --        config = function()
-  --            require('gitsigns').setup({
-  --                -- Your gitsigns configuration here
-  --            })
-  --        end,
-  --    }
-  --
-  -- Here is a more advanced example where we pass configuration
-  -- options to `gitsigns.nvim`.
-  --
-  -- See `:help gitsigns` to understand what the configuration keys do
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -409,6 +387,28 @@ require('lazy').setup({
     end,
   },
 
+  { 'ThePrimeagen/vim-be-good' },
+
+  {
+    'kdheepak/lazygit.nvim',
+    lazy = true,
+    cmd = {
+      'LazyGit',
+      'LazyGitConfig',
+      'LazyGitCurrentFile',
+      'LazyGitFilter',
+      'LazyGitFilterCurrentFile',
+    },
+    -- optional for floating window border decoration
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+    -- setting the keybinding for LazyGit with 'keys' is recommended in
+    -- order to load the plugin when the command is run for the first time
+    keys = {
+      { '<leader>lg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
+    },
+  },
   -- Add undotree
   {
     'mbbill/undotree',
@@ -442,38 +442,23 @@ require('lazy').setup({
   {
     'nvim-tree/nvim-tree.lua',
     opts = {
-      sort = { sorter = 'case_insensitive' },
       view = { width = 30 },
       renderer = { group_empty = true },
       filters = { dotfiles = false },
+      git = {
+        ignore = false, -- Show git-ignored files
+      },
       actions = {
         open_file = {
           quit_on_open = true,
         },
       },
-      filesystem = {
-        hijack_netrw = true,
-        commands = {
-          create = true,
-          delete = true,
-          rename = true,
-        },
-      },
-      on_attach = function(bufnr)
-        local api = require 'nvim-tree.api'
-        -- Load default mappings
-        api.config.mappings.default_on_attach(bufnr)
-        -- Custom mapping for changing the root to the current folder
-        vim.keymap.set('n', 'C', api.tree.change_root_to_node, { desc = 'Set folder as tree root', buffer = bufnr })
-      end,
     },
     keys = {
       { '<leader>e', '<cmd>NvimTreeToggle<CR>', desc = 'Toggle File Explorer' },
       { '<leader>E', '<cmd>NvimTreeFindFile<CR>', desc = 'Find Current File in Explorer' },
     },
   },
-
-  { 'ThePrimeagen/vim-be-good' },
 
   -- LSP Plugins
   {
