@@ -21,8 +21,17 @@ vim.opt.relativenumber = true
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
--- Don't show the mode, since it's already in the status line
+-- Don't show the mode, since it's already in the status linefilety
 vim.opt.showmode = false
+
+-- Add tab size settings
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+
+vim.opt.wrap = true -- Wrap lines at window edge
+vim.opt.linebreak = true -- Wrap at word boundaries (nicer than mid-word)
 
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
@@ -58,8 +67,7 @@ vim.opt.splitbelow = true
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
-vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.list = false
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -98,6 +106,8 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
 -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+
+-- Keybinds to make split navigation easier.
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -151,7 +161,7 @@ vim.opt.rtp:prepend(lazypath)
 --    :Lazy update
 --
 -- NOTE: Here is where you install your plugins.
-require('lazy').setup({
+require('lazy').setup {
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
@@ -422,6 +432,29 @@ require('lazy').setup({
   },
 
   {
+    'eero-lehtinen/oklch-color-picker.nvim',
+    event = 'VeryLazy',
+    version = '*',
+    keys = {
+      -- One handed keymap recommended, you will be using the mouse
+      {
+        '<leader>v',
+        function()
+          require('oklch-color-picker').pick_under_cursor()
+        end,
+        desc = 'Color pick under cursor',
+      },
+    },
+    ---@type oklch.Opts
+    opts = {},
+  },
+
+  {
+    'tpope/vim-commentary',
+    event = 'VeryLazy',
+  },
+
+  {
     'laytan/cloak.nvim',
     event = 'VeryLazy',
     config = function()
@@ -515,6 +548,14 @@ require('lazy').setup({
       --
       -- If you're wondering about lsp vs treesitter, you can check out the wonderfully
       -- and elegantly composed help section, `:help lsp-vs-treesitter`
+
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = { 'javascriptreact', 'typescriptreact' },
+        callback = function()
+          vim.b.commentary_line = '// %s'
+          vim.b.commentary_block = '/* %s */' -- Optionally define block comment style too
+        end,
+      })
 
       --  This function gets run when an LSP attaches to a particular buffer.
       --    That is to say, every time a new file is opened that is associated with
@@ -974,41 +1015,18 @@ require('lazy').setup({
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
-    -- There are additional nvim-treesitter modules that you can use to interact
-    -- with nvim-treesitter. You should go explore a few and see what interests you:
+    -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
+    --    This is the easiest way to modularize your config.
     --
-    --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-    --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-    --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+    --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
+    -- { import = 'custom.plugins' },
+    --
+    -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
+    -- Or use telescope!
+    -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
+    -- you can continue same window with `<space>sr` which resumes last telescope search
   },
 
-  -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
-  -- init.lua. If you want these files, they are in the repository, so you can just download them and
-  -- place them in the correct locations.
-
-  -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
-  --
-  --  Here are some example plugins that I've included in the Kickstart repository.
-  --  Uncomment any of the lines below to enable them (you will need to restart nvim).
-  --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
-
-  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  --    This is the easiest way to modularize your config.
-  --
-  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
-  --
-  -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
-  -- Or use telescope!
-  -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
-  -- you can continue same window with `<space>sr` which resumes last telescope search
-}, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
@@ -1028,7 +1046,6 @@ require('lazy').setup({
       lazy = '💤 ',
     },
   },
-})
-
+}
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
